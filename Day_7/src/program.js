@@ -1,3 +1,5 @@
+const readline = require('./my-readline');
+
 const {
     AddInstruction,
     MultiplyInstruction,
@@ -13,14 +15,14 @@ const {
 
 class Program {
 
-    constructor(input) {
+    constructor(program) {
         this.pc = 0;
-        this.memory = input.split(',').map(num => parseInt(num, 10));
+        this.memory = program.split(',').map(num => parseInt(num, 10));
         this.running = true;
-        this.readline = require('readline').createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+        this.terminated = false;
+        this.readline = readline;
+        this.args = [];
+        this.outputArgs = [];
     }
 
     readValue(offset) {
@@ -38,6 +40,7 @@ class Program {
 
     terminate() {
         this.running = false;
+        this.terminated = true;
     }
 
     fetchInstruction(operation) {
@@ -94,21 +97,26 @@ class Program {
         const firstValue = this.readValue(0);
         const operation = this.resolveOpcCodeAndParameterMode(firstValue);
         const instruction = this.fetchInstruction(operation);
-        await instruction.process(this);
+        return await instruction.process(this);
     }
 
-    async execute() {
+    async execute(args = []) {
+        this.args = args;
+        this.running = true;
         try {
-            while (this.running && this.pc < this.memory.length) {
-                await this.processInstructions();
+            while (this.running && !this.terminated && this.pc < this.memory.length) {
+                const retval = await this.processInstructions();
+                if (retval === -1) {
+                    this.running = false; // wait for next cycle
+                }
             }
         } catch (error) {
             console.error(error);
             console.error(this.memory);
-        } finally {
-            this.readline.close();
         }
-        return this.memory[0];
+        const copyOfOutputArgs = [...this.outputArgs];
+        this.outputArgs = [];
+        return copyOfOutputArgs;
     }
 
     readValueAtAddress(address) {

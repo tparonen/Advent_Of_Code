@@ -64,10 +64,18 @@ class InputInstruction extends Instruction {
         });
     }
 
+    readArgument(program) {
+        return program.args.shift();
+    }
+
     async process(program) {
-        const userInput = await this.promptInteger(program);
+        let programInput = this.readArgument(program);
+        if (programInput === undefined) {
+            //programInput = await this.promptInteger(program);
+            return -1;
+        }
         const outputAddress = this.getParameter(0);
-        program.writeValueAtAddress(outputAddress, userInput);
+        program.writeValueAtAddress(outputAddress, programInput);
         program.pc += this.params.length;
     }
 }
@@ -75,7 +83,9 @@ class InputInstruction extends Instruction {
 class OutputInstruction extends Instruction {
 
     async process(program) {
-        console.log('OUTPUT: ' + this.readParameterValue(program, 0));
+        const outputValue = this.readParameterValue(program, 0);
+        //console.log('OUTPUT: ' + outputValue);
+        program.outputArgs.push(outputValue);
         program.pc += this.params.length;
     }
 }

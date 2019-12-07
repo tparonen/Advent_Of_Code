@@ -1,15 +1,19 @@
 const fs = require('fs');
-const Program = require("./program");
+const checksum = require('./checksum');
 
-const processInput = async (input) => {
-    const params = input.split(',');
-    const program = new Program(params.join(','));
-
-    await program.execute()
+const processInput = (input) => {
+    const lines = input.split('\n');
+    lines.forEach(orbitMapEntry => {
+        if (orbitMapEntry) {
+            checksum.feed(orbitMapEntry);
+        }
+    });
+    const totalTransfers = checksum.calculate();
+    console.log('totalTransfers', totalTransfers);
 };
 
 const run = (filename) => {
-    fs.readFile(filename, 'utf8', async (err, data) => {
+    fs.readFile(filename, 'utf8', (err, data) => {
         if (err) {
             console.error(err);
             throw err;
