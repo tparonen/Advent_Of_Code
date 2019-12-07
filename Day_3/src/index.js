@@ -1,0 +1,1 @@
+require('./runtime').run(__dirname + '/resources/test_1.txt');
