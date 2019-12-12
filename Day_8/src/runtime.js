@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { flattenImage, renderImage } = require('./image');
 
 const processInput = async (input) => {
 
@@ -7,22 +8,16 @@ const processInput = async (input) => {
     const layerSize = layerWidth * layerHeight;
     const numLayers = input.length / layerSize;
 
-    console.log('Layers count', numLayers);
+    const layers = getLayersAndMetaData(input, numLayers, layerSize);
 
-    const digitCounts = countDigitsInLayers(input, numLayers, layerSize);
+    const image = flattenImage(layers);
 
-    let lowest = digitCounts[0];
-    digitCounts.forEach((count) => {
-        if (count.counts['0'] < lowest.counts['0']) {
-            lowest = count;
-        }
-    });
-    console.log('digitCounts', digitCounts);
-    console.log('lowest', lowest);
+    const renderedImage = renderImage(image, layerWidth, layerHeight);
 
+    console.log(renderedImage);
 };
 
-const countDigitsInLayers = (input, numLayers, layerSize) => {
+const getLayersAndMetaData = (input, numLayers, layerSize) => {
     const layerCounts = [];
     for (let i = 0; i < numLayers; i++) {
         const startIndex = i * layerSize;
@@ -31,6 +26,7 @@ const countDigitsInLayers = (input, numLayers, layerSize) => {
         const counts = countDigits(layer);
         layerCounts.push({
             index: i,
+            layer: layer,
             counts: counts
         });
     }
