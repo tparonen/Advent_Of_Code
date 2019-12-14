@@ -1,0 +1,1 @@
+require('./lib/index').run(__dirname + '/src/resources/input.txt');
