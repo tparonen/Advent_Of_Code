@@ -1,0 +1,17 @@
+{
+  "name": "day-5",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "eslint": "^6.7.2",
+    "jest": "^24.9.0",
+    "js-combinatorics": "^0.5.4",
+    "mock-stdin": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "yarn eslint ./src",
+    "start": "node src/index.js",
+    "test": "jest"
+  }
+}
