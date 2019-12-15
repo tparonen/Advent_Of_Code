@@ -10,6 +10,19 @@ export class Vector2D {
         this.y = y;
     }
 
+    public getLength(): number {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    public makeUnitVector(): Vector2D {
+        const length = this.getLength();
+        return new Vector2D(this.x / length, this.y / length);
+    }
+
+    public flipY(): Vector2D {
+        return new Vector2D(this.x, -1 * this.y);
+    }
+
     public equalsTo(other: Vector2D): boolean {
         return this.x === other.x && this.y === other.y;
     }
@@ -22,21 +35,47 @@ export class Vector2D {
         return new Vector2D(this.x - other.x, this.y - other.y);
     }
 
+    private static findGreatestCommonDivisor(a: number, b: number) {
+        const lengthA = Math.abs(a);
+        const lengthB = Math.abs(b);
+
+        let larger = lengthA >= lengthB ? lengthA : lengthB;
+        let smaller = lengthA < lengthB ? lengthA : lengthB;
+
+        while (true) {
+            if (smaller === 0) {
+                return larger;
+            }
+            larger = larger % smaller;
+            if (larger === 0) {
+                return smaller;
+            }
+            smaller = smaller % larger;
+        }
+    }
+
     public calculateDelta(other: Vector2D): Vector2D {
-        const delta = other.subtract(this);
+        if (this.equalsTo(other)) {
+            return new Vector2D(0, 0);
+        }
+        const delta = this.subtract(other);
+
+        const lengthX = Math.abs(delta.x);
+        const lengthY = Math.abs(delta.y);
+
+        const divisor = Vector2D.findGreatestCommonDivisor(lengthX, lengthY);
+
         if (delta.x === 0) {
-            return new Vector2D(0, 1);
+            return new Vector2D(0, delta.y / lengthY);
         }
         if (delta.y === 0) {
-            return new Vector2D(1, 0);
+            return new Vector2D(delta.x / lengthX, 0);
         }
-        if ((delta.x < delta.y) && (delta.y % delta.x === 0)) {
-            return new Vector2D(delta.x, delta.y / delta.x);
-        }
-        if ((delta.y < delta.x) && (delta.x % delta.y === 0)) {
-            return new Vector2D(delta.x / delta.y, delta.y);
-        }
-        return delta;
+        return new Vector2D(delta.x / divisor, delta.y / divisor);
+    }
+
+    public toString() {
+        return `(${this.x}, ${this.y})`
     }
 }
 
@@ -64,14 +103,19 @@ export class AsteroidPosition {
     }
 
     toString() {
-        return this.asteroid.position;
+        return this.asteroid.position.toString();
     }
 
     private findAllPositionsInTrajectoryTo(otherPosition: AsteroidPosition): AsteroidPosition[] {
         const asteroidA = this.getAsteroid();
         const asteroidB = otherPosition.getAsteroid();
 
-        const delta = asteroidA.position.calculateDelta(asteroidB.position);
+        const delta = asteroidB.position.calculateDelta(asteroidA.position);
+
+        if (asteroidA.position.equalsTo(new Vector2D(0,8))) {
+            //console.log('--------');
+            //console.log('delta', delta);
+        }
 
         const result: AsteroidPosition[] = [];
         for (let position = asteroidA.position;;position = position.add(delta)) {
@@ -88,6 +132,9 @@ export class AsteroidPosition {
 
     hasLineOfSight(other: AsteroidPosition): boolean {
         const linePositions = this.findAllPositionsInTrajectoryTo(other);
+        // if (linePositions.length === 2 && this.asteroid.position.equalsTo(new Vector2D(0,8))) {
+        //     console.log('linePositions', linePositions.map(lp => lp.toString()));
+        // }
         return linePositions.length === 2;
     }
 }

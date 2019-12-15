@@ -23,6 +23,12 @@ describe('asteroid', () => {
         const asteroidMap = AsteroidMap.fromSerializedMap(serializedMap);
         const positions = asteroidMap.getAsteroidPositions();
         expect(positions[0].hasLineOfSight(positions[2])).toBeFalsy();
-    })
+    });
+
+    test('Asteroid does not have line of sight to itself', () => {
+        const asteroidMap = AsteroidMap.fromSerializedMap(serializedMap);
+        const positions = asteroidMap.getAsteroidPositions();
+        expect(positions[0].hasLineOfSight(positions[0])).toBeFalsy();
+    });
 
 });

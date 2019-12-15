@@ -47,7 +47,7 @@ export class AsteroidMap {
                 const column = cols[colIndex];
                 grid.push(new GridCell(
                     this.resolveGridCellType(column),
-                    new Vector2D(rowIndex, colIndex)
+                    new Vector2D(colIndex, rowIndex)
                 ));
             }
         }
